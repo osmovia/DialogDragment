@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        clickItemList()
 
         model.data.observe(this, {
             listCardData.add(it)
@@ -50,6 +52,17 @@ class MainActivity : AppCompatActivity() {
         listForAdapter.clear()
         for(item in listCardData) {
             listForAdapter.add("${item.word}     ----->     ${item.translate}")
+        }
+    }
+    fun clickItemList() {
+        binding.lisView.setOnItemClickListener { parent, view, position, id ->
+            Toast.makeText(applicationContext, "Click position: $position!", Toast.LENGTH_SHORT).show()
+            model.liveData.value = listCardData[position]
+
+            val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+            val newFragment: DialogFragment = DialogAddWord.newInstance()
+            newFragment.show(fragmentTransaction, "dialog_2")
+
         }
     }
 }

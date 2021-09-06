@@ -1,6 +1,7 @@
 package com.example.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ArrayAdapter
@@ -9,11 +10,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private val listCardData: MutableList<CardData> = mutableListOf()
-    private val listForAdapter: MutableList<String> = mutableListOf()
 
     private lateinit var binding: ActivityMainBinding
     private val model: ClassViewModel by viewModels()
@@ -21,14 +23,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
-        clickItemList()
+        setContentView(binding.root)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        val myAdapter = CustomRecyclerAdapter(listCardData, this)/* { position -> onListItemClick(position) }*/
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = myAdapter
+
+        model.finished.observe(this,{
+            val newData = it
+            var index = 0
+            for((word, translate, id) in listCardData) {
+                index++
+                if(newData.id == id) {
+                    index--
+                    listCardData[index] = newData
+                    myAdapter.notifyDataSetChanged()
+                }
+                Log.d("Slavik" , "index: $word  value: $translate  id: $id")
+            }
+
+        })
 
         model.data.observe(this, {
             listCardData.add(it)
-            createNewListForAdapter()
-            updateList()
         })
     }
 
@@ -39,16 +57,25 @@ class MainActivity : AppCompatActivity() {
 
     fun showDialog(item: android.view.MenuItem) {
         val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-        val newFragment: DialogFragment = DialogAddWord.newInstance()
+        val newFragment: DialogFragment = DialogAddWord(true)
         newFragment.show(fragmentTransaction, "dialog")
+
     }
 
-    private fun updateList() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listForAdapter )
-        binding.lisView.adapter = adapter
+    /*private fun onListItemClick(position: Int) {
+        Toast.makeText(this, "Position : $position", Toast.LENGTH_SHORT).show()
+    }*/
+
+    fun onItemClick(position: Int) {
+        model.liveData.value = listCardData[position]
+        val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+        val newFragment: DialogFragment = DialogAddWord(false)
+        newFragment.show(fragmentTransaction, "dialog")
+
+
     }
 
-    private fun createNewListForAdapter() {
+    /*private fun createNewListForAdapter() {
         listForAdapter.clear()
         for(item in listCardData) {
             listForAdapter.add("${item.word}     ----->     ${item.translate}")
@@ -64,5 +91,5 @@ class MainActivity : AppCompatActivity() {
             newFragment.show(fragmentTransaction, "dialog_2")
 
         }
-    }
+    }*/
 }

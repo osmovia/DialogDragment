@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.example.fragment.databinding.DialogBinding
 
-class DialogAddWord : DialogFragment() {
+class DialogAddWord(val boolean: Boolean) : DialogFragment() {
      lateinit var binding: DialogBinding
      val model: ClassViewModel by activityViewModels()
 
@@ -25,15 +25,33 @@ class DialogAddWord : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
 
-        binding.button.setOnClickListener {
-            val cardData = CardData(binding.editTextOriginalWord.text.toString(), binding.editTextTranslateWord.text.toString())
-            model.data.value = cardData
-            dismiss()
+        if(boolean) {
+            binding.button.setOnClickListener {
+                val cardData = CardData(
+                    binding.editTextOriginalWord.text.toString(),
+                    binding.editTextTranslateWord.text.toString()
+                )
+                model.data.value = cardData
+                dismiss()
+            }
+        } else {
+            var id = ""
+            model.liveData.observe(this, {
+                id = it.id
+                binding.editTextOriginalWord.setText(it.word)
+                binding.editTextTranslateWord.setText(it.translate)
+            })
+
+            binding.button.setOnClickListener {
+                val cardData = CardData(binding.editTextOriginalWord.text.toString(), binding.editTextTranslateWord.text.toString(), id)
+                model.finished.value = cardData
+                dismiss()
+            }
         }
     }
 
-    companion object {
+    /*companion object {
         @JvmStatic
-        fun newInstance() = DialogAddWord()
-    }
+        fun newInstance(boolean: Boolean) = DialogAddWord()
+    }*/
 }

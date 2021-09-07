@@ -6,15 +6,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomRecyclerAdapter (private val mutableList: MutableList<CardData>,
-                             private val owner: MainActivity?/*,
-                             private val onItemClicked: (position: Int) -> Unit*/) :
+class CustomRecyclerAdapter(
+    private var mutableList: MutableList<CardData>,
+    private val owner: MainActivity?
+) :
     RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
 
-    
 
-    class MyViewHolder(itemView: View/*, private val onItemClicked: (position: Int) -> Unit*/)
-        : RecyclerView.ViewHolder(itemView)/*, View.OnClickListener*/{
+    class MyViewHolder(itemView: View/*, private val onItemClicked: (position: Int) -> Unit*/) :
+        RecyclerView.ViewHolder(itemView)/*, View.OnClickListener*/ {
         var textViewOriginal: TextView? = null
         var textViewTranslate: TextView? = null
         var itemContainer: ViewGroup? = null
@@ -44,11 +44,25 @@ class CustomRecyclerAdapter (private val mutableList: MutableList<CardData>,
         holder.textViewTranslate?.text = mutableList[position].translate
 
         holder.itemContainer?.setOnClickListener {
-            owner?.onItemClick(position)
+            owner?.onItemClick(item)
         }
     }
 
     override fun getItemCount() = mutableList.size
 
 
+    fun setWords(wordsList: MutableList<CardData>) {
+        mutableList = wordsList
+        notifyDataSetChanged()
+    }
+
+    fun setWord(newCardData: CardData) {
+        mutableList.forEachIndexed { index, cardData ->
+            if (cardData.id == newCardData.id) {
+                mutableList[index] = newCardData
+                notifyItemChanged(index)
+                return
+            }
+        }
+    }
 }

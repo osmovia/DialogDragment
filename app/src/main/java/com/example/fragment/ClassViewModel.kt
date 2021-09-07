@@ -7,11 +7,7 @@ class ClassViewModel : ViewModel() {
      val data: MutableLiveData<CardData> by lazy {
         MutableLiveData<CardData>()
     }
-    val liveData :MutableLiveData<CardData> by lazy {
+    val finished: MutableLiveData<CardData> by lazy {
         MutableLiveData<CardData>()
     }
-    val finished :MutableLiveData<CardData> by lazy {
-        MutableLiveData<CardData>()
-    }
-
 }

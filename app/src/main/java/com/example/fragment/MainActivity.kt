@@ -30,18 +30,24 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = myAdapter
 
-        model.finished.observe(this,{
-            val newData = it
-            var index = 0
-            for((word, translate, id) in listCardData) {
-                index++
-                if(newData.id == id) {
-                    index--
+        model.finished.observe(this,{ newData ->
+            listCardData.forEachIndexed { index, cardData ->
+                if(newData.id == cardData.id) {
                     listCardData[index] = newData
-                    myAdapter.notifyDataSetChanged()
+                    myAdapter.notifyItemChanged(index)
                 }
-                Log.d("Slavik" , "index: $word  value: $translate  id: $id")
+                Log.d("Slavik" , "index: ${cardData.word}  value: ${cardData.translate}  id: ${cardData.id}")
             }
+
+//            for((word, translate, id) in listCardData) {
+//                index++
+//                if(newData.id == id) {
+//                    index--
+//                    listCardData[index] = newData
+//                    myAdapter.notifyItemChanged(index)
+//                }
+//                Log.d("Slavik" , "index: $word  value: $translate  id: $id")
+//            }
 
         })
 

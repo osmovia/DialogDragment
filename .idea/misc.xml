@@ -3,11 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1265625" />
+        <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/drawable/ic_baseline_add_48.xml" value="0.25" />
+        <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.2703125" />
+        <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1265625" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/activity_main.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/activity_toolbar.xml" value="0.1" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/actvity_toolbar.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/dialog.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/fragment_blank.xml" value="0.13020833333333334" />
+        <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/fragment_delete_word.xml" value="0.264" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/recyclerview_item.xml" value="0.176" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/test.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/HP-PC/AndroidStudioProject/Fragment/app/src/main/res/layout/toolbar.xml" value="0.196875" />

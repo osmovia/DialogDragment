@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.ActivityMainBinding
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val model: ClassViewModel by viewModels()
 
-    private lateinit var adapter: CustomRecyclerAdapter
+     lateinit var adapter: CustomRecyclerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +33,17 @@ class MainActivity : AppCompatActivity() {
         adapter = CustomRecyclerAdapter(listCardData, this)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+
+        val item = object : SwipeToDelete(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val fragment = DeleteWordFragment()
+                fragment.show(supportFragmentManager, "tag")
+            }
+
+        }
+         val itemTouchHelper = ItemTouchHelper(item)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+
 
         model.data.observe(this, {
             adapter.setWords(it)

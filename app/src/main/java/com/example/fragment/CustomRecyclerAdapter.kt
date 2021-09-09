@@ -45,6 +45,11 @@ class CustomRecyclerAdapter (private var mutableList: MutableList<CardData>,
         notifyDataSetChanged()
     }
 
+/*    fun delete(position: Int) {
+        mutableList.removeAt(position)
+        notifyDataSetChanged()
+    }*/
+
     fun setWord(newCardData: CardData) {
         mutableList.forEachIndexed { index, cardData ->
             if (cardData.id == newCardData.id) {

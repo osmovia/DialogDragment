@@ -41,7 +41,7 @@ class DialogAddWord : DialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireDialog().window
+        requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
 
         if (cardData == null) {
             binding.editTextOriginalWord.apply {

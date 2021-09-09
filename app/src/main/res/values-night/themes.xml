@@ -19,7 +19,7 @@
         <!-- (1)-->
         <item name="android:windowIsFloating">false</item>
         <!-- (2) -->
-        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowBackground">@color/blue_lighten</item>
     </style>
 
     <style name="DialogAnimation">

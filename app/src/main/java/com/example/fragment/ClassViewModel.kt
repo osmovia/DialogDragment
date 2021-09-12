@@ -4,10 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class ClassViewModel : ViewModel() {
-     val data: MutableLiveData<CardData> by lazy {
+     val dataAddNewWord: MutableLiveData<CardData> by lazy {
         MutableLiveData<CardData>()
     }
-    val finished: MutableLiveData<CardData> by lazy {
+    val dataChangeNewWord: MutableLiveData<CardData> by lazy {
         MutableLiveData<CardData>()
+    }
+    val dataDeleteWord: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
     }
 }

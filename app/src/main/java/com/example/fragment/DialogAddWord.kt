@@ -17,7 +17,7 @@ import com.example.fragment.databinding.DialogBinding
 class DialogAddWord : DialogFragment() {
 
     companion object {
-        val cardDataKey = "CARD_DATA_KEY"
+        const val cardDataKey = "CARD_DATA_KEY"
     }
 
     private val cardData: CardData?
@@ -42,16 +42,26 @@ class DialogAddWord : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
-
         if (cardData == null) {
             binding.editTextOriginalWord.apply {
                 requestFocus()
                 showSoftKeyboard()
+                setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+                    if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                        binding.editTextTranslateWord.requestFocus()
+                        return@OnKeyListener true
+                    }
+                    false
+                })
             }
-
-            binding.editTextOriginalWord.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            binding.editTextTranslateWord.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                    binding.editTextTranslateWord.requestFocus()
+                    val cardData = CardData(
+                        binding.editTextOriginalWord.text.toString(),
+                        binding.editTextTranslateWord.text.toString()
+                    )
+                    model.dataAddNewWord.value = cardData
+                    dismiss()
                     return@OnKeyListener true
                 }
                 false
@@ -62,28 +72,44 @@ class DialogAddWord : DialogFragment() {
                     binding.editTextOriginalWord.text.toString(),
                     binding.editTextTranslateWord.text.toString()
                 )
-                model.data.value = cardData
+                model.dataAddNewWord.value = cardData
                 dismiss()
             }
         } else {
-            binding.editTextOriginalWord.setText(cardData?.word)
-            binding.editTextTranslateWord.setText(cardData?.translate)
+            binding.editTextOriginalWord.apply {
+                setText(cardData?.word)
+                requestFocus()
+                setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+                    if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                        binding.editTextTranslateWord.requestFocus()
+                        return@OnKeyListener true
+                    }
+                    false
+                })
+            }
+            binding.editTextTranslateWord.apply {
+                setText(cardData?.translate)
+                setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+                    if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                        model.dataChangeNewWord.value = cardData?.apply {
+                            word = binding.editTextOriginalWord.text.toString()
+                            translate = binding.editTextTranslateWord.text.toString()
+                        }
+                        dismiss()
+                        return@OnKeyListener true
+                    }
+                    false
+                })
+            }
 
             binding.button.setOnClickListener {
-                model.finished.value = cardData?.apply {
+                model.dataChangeNewWord.value = cardData?.apply {
                     word = binding.editTextOriginalWord.text.toString()
                     translate = binding.editTextTranslateWord.text.toString()
                 }
                 dismiss()
             }
         }
-        binding.editTextOriginalWord.setOnKeyListener(View.OnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                binding.editTextTranslateWord.requestFocus()
-                return@OnKeyListener true
-            }
-            false
-        })
     }
     private fun EditText.showSoftKeyboard() {
         post {
@@ -92,6 +118,16 @@ class DialogAddWord : DialogFragment() {
             inputMethodManager.showSoftInput(this, SHOW_IMPLICIT)
         }
     }
+    private fun clickEnter(view: View) {
+        view.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                binding.editTextTranslateWord.requestFocus()
+                return@OnKeyListener true
+            }
+            false
+        })
+    }
+
 }
 fun FragmentActivity.showDialogFragment(cardData: CardData? = null) {
     val args = Bundle()

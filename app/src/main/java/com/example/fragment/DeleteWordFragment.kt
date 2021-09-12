@@ -1,17 +1,22 @@
 package com.example.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import com.example.fragment.databinding.FragmentDeleteWordBinding
 
 
 class DeleteWordFragment : DialogFragment() {
+    companion object {
+        const val yes = "YES"
+        const val no = "NO"
+    }
 
     lateinit var binding: FragmentDeleteWordBinding
+    private val model: ClassViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,16 +34,16 @@ class DeleteWordFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
-        /*binding.buttonYes.setOnClickListener {
-            transferData("yes")
+        binding.buttonYes.setOnClickListener {
+            transferData(yes)
         }
         binding.buttonNo.setOnClickListener {
-            transferData("no")
+            transferData(no)
         }
 
     }
-    fun transferData(yesOrNo: String) {
-        val args = Bundle()
-        args.putString(yesOrNo, yesOrNo)*/
+    private fun transferData(yesOrNo: String) {
+        model.dataDeleteWord.value = yesOrNo
+        dismiss()
     }
 }

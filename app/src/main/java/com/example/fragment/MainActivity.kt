@@ -1,23 +1,21 @@
 package com.example.fragment
 
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.ActivityMainBinding
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class MainActivity : AppCompatActivity() {
-    private val listCardData: MutableList<CardData> = mutableListOf()
+    private var listCardData: MutableList<CardData> = mutableListOf()
+    private var positionFromSwipe: Int? = null
 
     private lateinit var binding: ActivityMainBinding
     private val model: ClassViewModel by viewModels()
@@ -37,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         val item = object : SwipeToDelete(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val fragment = DeleteWordFragment()
+                positionFromSwipe = viewHolder.absoluteAdapterPosition
                 fragment.show(supportFragmentManager, "tag")
             }
 
@@ -44,14 +43,22 @@ class MainActivity : AppCompatActivity() {
          val itemTouchHelper = ItemTouchHelper(item)
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
-
-        model.data.observe(this, {
+        model.dataAddNewWord.observe(this, {
             adapter.setWords(it)
         })
 
-        model.finished.observe(this, { newData ->
-            adapter.setWord(newData)
+        model.dataChangeNewWord.observe(this, {
+            adapter.setWord(it)
         })
+
+        model.dataDeleteWord.observe(this, {
+            if(it == DeleteWordFragment.yes) {
+                adapter.delete(positionFromSwipe!!)
+            } else {
+                adapter.update(positionFromSwipe!!)
+            }
+        })
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -64,4 +71,25 @@ class MainActivity : AppCompatActivity() {
     fun showDialog(menu: MenuItem) {
         showDialogFragment()
     }
+
+    /*private fun saveData() {
+        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val gson = Gson()
+        val json = gson.toJson(listCardData)
+        editor.putString("task list", json)
+        editor.apply()
+    }
+
+    private fun loadData() {
+        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
+        val gson = Gson()
+        val json = sharedPreferences.getString("task list", "")
+        val type = object: TypeToken<MutableList<CardData>>() {}.type
+
+        if(json == null)
+            listCardData = mutableListOf()
+        else
+            listCardData = gson.fromJson(json, type)
+    }*/
 }

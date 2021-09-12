@@ -27,6 +27,7 @@
         android:ems="10"
         android:hint="Translate"
         android:minHeight="48dp"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="@+id/editTextOriginalWord"
         app:layout_constraintStart_toStartOf="@+id/editTextOriginalWord"
         app:layout_constraintTop_toBottomOf="@+id/editTextOriginalWord" />

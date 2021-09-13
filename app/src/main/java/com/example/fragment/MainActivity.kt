@@ -1,6 +1,5 @@
 package com.example.fragment
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -26,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        loadData()
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         adapter = CustomRecyclerAdapter(listCardData, this)
@@ -45,10 +45,12 @@ class MainActivity : AppCompatActivity() {
 
         model.dataAddNewWord.observe(this, {
             adapter.setWords(it)
+            saveData()
         })
 
         model.dataChangeNewWord.observe(this, {
             adapter.setWord(it)
+            saveData()
         })
 
         model.dataDeleteWord.observe(this, {
@@ -57,6 +59,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 adapter.update(positionFromSwipe!!)
             }
+            saveData()
         })
 
     }
@@ -72,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         showDialogFragment()
     }
 
-    /*private fun saveData() {
+    private fun saveData() {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val gson = Gson()
@@ -91,5 +94,5 @@ class MainActivity : AppCompatActivity() {
             listCardData = mutableListOf()
         else
             listCardData = gson.fromJson(json, type)
-    }*/
+    }
 }

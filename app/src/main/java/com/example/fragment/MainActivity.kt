@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.ActivityMainBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -90,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         val json = sharedPreferences.getString("task list", "")
         val type = object: TypeToken<MutableList<CardData>>() {}.type
 
-        if(json == null)
+        if(json == null || json.isBlank())
             listCardData = mutableListOf()
         else
             listCardData = gson.fromJson(json, type)

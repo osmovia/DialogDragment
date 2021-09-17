@@ -6,6 +6,5 @@
         android:id="@+id/addMenu"
         android:icon="@drawable/ic_baseline_add_48"
         android:title="@string/app_name"
-        android:onClick="showDialog"
         app:showAsAction="always" />
 </menu>

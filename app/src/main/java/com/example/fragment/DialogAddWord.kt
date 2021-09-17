@@ -9,9 +9,12 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT
 import android.widget.EditText
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.fragment.databinding.DialogBinding
 
 class DialogAddWord : DialogFragment() {
@@ -60,8 +63,8 @@ class DialogAddWord : DialogFragment() {
                         binding.editTextOriginalWord.text.toString(),
                         binding.editTextTranslateWord.text.toString()
                     )
-                    model.dataAddNewWord.value = cardData
-                    dismiss()
+                    findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY", cardData)
+                    findNavController().popBackStack()
                     return@OnKeyListener true
                 }
                 false
@@ -72,8 +75,8 @@ class DialogAddWord : DialogFragment() {
                     binding.editTextOriginalWord.text.toString(),
                     binding.editTextTranslateWord.text.toString()
                 )
-                model.dataAddNewWord.value = cardData
-                dismiss()
+                findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY", cardData)
+                findNavController().popBackStack()
             }
         } else {
             binding.editTextOriginalWord.apply {
@@ -118,21 +121,5 @@ class DialogAddWord : DialogFragment() {
             inputMethodManager.showSoftInput(this, SHOW_IMPLICIT)
         }
     }
-    private fun clickEnter(view: View) {
-        view.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                binding.editTextTranslateWord.requestFocus()
-                return@OnKeyListener true
-            }
-            false
-        })
-    }
+}
 
-}
-fun FragmentActivity.showDialogFragment(cardData: CardData? = null) {
-    val args = Bundle()
-    val fragment = DialogAddWord()
-    args.putSerializable(DialogAddWord.cardDataKey, cardData)
-    fragment.arguments = args
-    fragment.show(supportFragmentManager, "dialog")
-}

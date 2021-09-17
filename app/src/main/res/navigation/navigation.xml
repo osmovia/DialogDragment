@@ -1,6 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/navigation">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/loginFragment">
 
+    <dialog
+        android:id="@+id/deleteWordFragment"
+        android:name="com.example.fragment.DeleteWordFragment"
+        android:label="fragment_delete_word"
+        tools:layout="@layout/fragment_delete_word" />
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.example.fragment.RegistrationFragment"
+        android:label="RegistrationFragment" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.fragment.LoginFragment"
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_recyclerWordFragment"
+            app:destination="@id/recyclerWordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/dialogAddWord"
+        android:name="com.example.fragment.DialogAddWord"
+        android:label="DialogAddWord" >
+
+        <argument
+            android:name="cardData"
+            app:argType="com.example.fragment.CardData"
+            app:nullable="true"/>
+    </dialog>
+
+    <fragment
+        android:id="@+id/recyclerWordFragment"
+        android:name="com.example.fragment.RecyclerWordFragment"
+        android:label="RecyclerWordFragment" >
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogAddWord"
+            app:destination="@id/dialogAddWord" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_deleteWordFragment"
+            app:destination="@id/deleteWordFragment" />
+    </fragment>
 </navigation>

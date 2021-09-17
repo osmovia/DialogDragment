@@ -14,19 +14,19 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class MainActivity : AppCompatActivity() {
-    private var listCardData: MutableList<CardData> = mutableListOf()
-    private var positionFromSwipe: Int? = null
+    // private var listCardData: MutableList<CardData> = mutableListOf()
+    // private var positionFromSwipe: Int? = null
 
     private lateinit var binding: ActivityMainBinding
-    private val model: ClassViewModel by viewModels()
+    //private val model: ClassViewModel by viewModels()
 
-     lateinit var adapter: CustomRecyclerAdapter
+    //lateinit var adapter: CustomRecyclerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        loadData()
+        /* loadData()
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         adapter = CustomRecyclerAdapter(listCardData, this)
@@ -95,5 +95,6 @@ class MainActivity : AppCompatActivity() {
             listCardData = mutableListOf()
         else
             listCardData = gson.fromJson(json, type)
+    }*/
     }
 }

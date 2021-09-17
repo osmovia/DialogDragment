@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.fragment.databinding.FragmentDeleteWordBinding
 
 
@@ -43,7 +44,7 @@ class DeleteWordFragment : DialogFragment() {
 
     }
     private fun transferData(yesOrNo: String) {
-        model.dataDeleteWord.value = yesOrNo
-        dismiss()
+        findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY1", yesOrNo)
+        findNavController().popBackStack()
     }
 }

@@ -12,6 +12,7 @@ import com.example.fragment.databinding.FragmentDeleteWordBinding
 
 class DeleteWordFragment : DialogFragment() {
     companion object {
+        const val deleteWordKey = "DELETE_WORD_KEY"
         const val yes = "YES"
         const val no = "NO"
     }
@@ -44,7 +45,7 @@ class DeleteWordFragment : DialogFragment() {
 
     }
     private fun transferData(yesOrNo: String) {
-        findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY1", yesOrNo)
+        findNavController().previousBackStackEntry?.savedStateHandle?.set(deleteWordKey, yesOrNo)
         findNavController().popBackStack()
     }
 }

@@ -13,7 +13,7 @@ import com.example.fragment.databinding.FragmentWordRecyclerBinding
 class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 
     private var listCardData: MutableList<CardData> = mutableListOf()
-    private var positionFromSwipe: Int? = null
+    private var positionClickAndSwipe: Int? = null
     lateinit var adapter: CustomRecyclerAdapter
     lateinit var binding: FragmentWordRecyclerBinding
 
@@ -28,21 +28,30 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 
     override fun onViewCreated(view: View,
                                savedInstanceState: Bundle?) {
+
         adapter = CustomRecyclerAdapter(listCardData, this)
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = adapter
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>("KEY1")?.observe(
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(DeleteWordFragment.deleteWordKey)?.observe(
             viewLifecycleOwner) {
-            listCardData.removeAt(positionFromSwipe!!)
+            listCardData.removeAt(positionClickAndSwipe!!)
+            adapter.notifyDataSetChanged()
+        }
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(DialogAddWord.newWordKey)?.observe(
+            viewLifecycleOwner) { newWord ->
+            listCardData.add(newWord)
+        }
+        viewLifecycleOwner
+        val changeWord = arguments?.get(DialogAddWord.changeWordKey)
+        if (changeWord != null) {
+            changeWord as CardData
+            adapter.setWord(changeWord)
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>("KEY")?.observe(
-            viewLifecycleOwner) { result ->
-            listCardData.add(result)
-        }
         val item = object : SwipeToDelete(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                positionFromSwipe = viewHolder.absoluteAdapterPosition
+                positionClickAndSwipe = viewHolder.absoluteAdapterPosition
                 findNavController().navigate(R.id.deleteWordFragment)
             }
         }

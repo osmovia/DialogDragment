@@ -20,6 +20,8 @@ import com.example.fragment.databinding.DialogBinding
 class DialogAddWord : DialogFragment() {
 
     companion object {
+        const val newWordKey = "NEW_WORD_KEY"
+        const val changeWordKey = "CHANGE_WORD"
         const val cardDataKey = "CARD_DATA_KEY"
     }
 
@@ -63,7 +65,7 @@ class DialogAddWord : DialogFragment() {
                         binding.editTextOriginalWord.text.toString(),
                         binding.editTextTranslateWord.text.toString()
                     )
-                    findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY", cardData)
+                    findNavController().previousBackStackEntry?.savedStateHandle?.set(newWordKey, cardData)
                     findNavController().popBackStack()
                     return@OnKeyListener true
                 }
@@ -75,7 +77,7 @@ class DialogAddWord : DialogFragment() {
                     binding.editTextOriginalWord.text.toString(),
                     binding.editTextTranslateWord.text.toString()
                 )
-                findNavController().previousBackStackEntry?.savedStateHandle?.set("KEY", cardData)
+                findNavController().previousBackStackEntry?.savedStateHandle?.set(newWordKey, cardData)
                 findNavController().popBackStack()
             }
         } else {
@@ -98,7 +100,11 @@ class DialogAddWord : DialogFragment() {
                             word = binding.editTextOriginalWord.text.toString()
                             translate = binding.editTextTranslateWord.text.toString()
                         }
-                        dismiss()
+                        findNavController().navigate(R.id.recyclerWordFragment,
+                        bundleOf(changeWordKey to cardData?.apply {
+                            word = binding.editTextOriginalWord.text.toString()
+                            translate = binding.editTextTranslateWord.text.toString()
+                        }))
                         return@OnKeyListener true
                     }
                     false

@@ -2,6 +2,7 @@ package com.example.fragment
 
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +34,7 @@ class DialogAddWord : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("SLAVIK", "DialogAddWord: onCreate")
         setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
     }
 
@@ -42,11 +44,33 @@ class DialogAddWord : DialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DialogBinding.inflate(layoutInflater)
+        Log.d("SLAVIK", "DialogAddWord: onCreateView")
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("SLAVIK", "DialogAddWord: onResume")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("SLAVIK", "DialogAddWord: onDestroy")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("SLAVIK", "DialogAddWord: onStart")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("SLAIK", "DialogAddWord: onStop")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
+        Log.d("SLAVIK", "DialogAddWord: onViewCreated")
         if (cardData == null) {
             binding.editTextOriginalWord.apply {
                 requestFocus()

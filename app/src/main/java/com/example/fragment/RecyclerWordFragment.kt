@@ -1,6 +1,7 @@
 package com.example.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -11,6 +12,51 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.FragmentWordRecyclerBinding
 
 class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("SLAVIK", "onCreate")
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        Log.d("SLAVIK", "RecyclerWordFragment: onViewStateRestored")
+        super.onViewStateRestored(savedInstanceState)
+    }
+
+    override fun onStart() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onStart")
+        super.onStart()
+    }
+
+    override fun onResume() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onResume")
+        super.onResume()
+    }
+
+    override fun onPause() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onPause")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onStop")
+        super.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("SLAVIK", "RecyclerWordFragment: onSaveInstanceState")
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroyView() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onDestroyView")
+        super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        Log.d("SLAVIK", "RecyclerWordFragment: onDestroy")
+        super.onDestroy()
+    }
+
 
     private var listCardData: MutableList<CardData> = mutableListOf()
     private var positionClickAndSwipe: Int? = null
@@ -28,6 +74,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 
     override fun onViewCreated(view: View,
                                savedInstanceState: Bundle?) {
+        Log.d("SLAVIK", "RecyclerWordFragment: onViewCreated")
 
         adapter = CustomRecyclerAdapter(listCardData, this)
         binding.recyclerView.layoutManager = LinearLayoutManager(context)

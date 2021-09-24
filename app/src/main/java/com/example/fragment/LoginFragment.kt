@@ -1,8 +1,8 @@
 package com.example.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -25,27 +25,28 @@ class LoginFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        binding.buttonExit.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            Log.d("SLAVIK", "Exit account")
+        }
+        binding.buttonFirebase.setOnClickListener{
+            findNavController().navigate(R.id.cloudFirestoreFragment)
+        }
+        binding.buttonDeveloper.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_recyclerWordFragment)
+        }
 
         binding.linerLayoutRegister.setOnClickListener {
-            findNavController().navigate(R.id.registrationFragment)
+            findNavController().navigate(R.id.action_loginFragment_to_registrationFragment)
         }
 
         binding.buttonLogin.setOnClickListener {
-            findNavController().navigate(R.id.recyclerWordFragment)
-        }
-        /*binding.linerLayoutRegister.setOnClickListener {
-            childFragmentManager
-                .beginTransaction()
-                .add(R.id.fragmentRegistration, RegistrationFragment())
-                .commit()
-        }
-        binding.buttonLogin.setOnClickListener {
             when {
-                TextUtils.isEmpty(binding.editTextLoginEmail.text.toString().trim { it <= ' ' }) -> {
-                    Toast.makeText(context, "Please enter email.", Toast.LENGTH_LONG).show()
+                TextUtils.isEmpty(binding.editTextLoginEmail.text.toString().trim{ it <= ' '}) ->{
+                    Toast.makeText(requireActivity(), "Please enter email.", Toast.LENGTH_LONG).show()
                 }
                 TextUtils.isEmpty(binding.editTextLoginPassword.text.toString().trim { it <= ' ' }) -> {
-                    Toast.makeText(context, "Please enter password.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireActivity(), "Please enter password.", Toast.LENGTH_LONG).show()
                 }
                 else -> {
                     val email : String = binding.editTextLoginEmail.text.toString().trim { it <= ' ' }
@@ -54,19 +55,15 @@ class LoginFragment : Fragment() {
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(context, "You are logged successfully", Toast.LENGTH_LONG).show()
+                                Toast.makeText(requireActivity(), "You are logged successfully", Toast.LENGTH_LONG).show()
+                                findNavController().navigate(R.id.action_loginFragment_to_recyclerWordFragment)
 
-                                val intent = Intent(context, MainActivity::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                startActivity(intent)
-                                activity?.onBackPressed()
                             } else {
-                                Toast.makeText(context, task.exception!!.message.toString(), Toast.LENGTH_LONG).show()
+                                Toast.makeText(requireActivity(), task.exception!!.message.toString(), Toast.LENGTH_LONG).show()
                             }
                         }
-
                 }
             }
-        }*/
+        }
     }
 }

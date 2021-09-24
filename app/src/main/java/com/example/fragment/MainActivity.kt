@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        /* loadData()
+         /*loadData()
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         adapter = CustomRecyclerAdapter(listCardData, this)

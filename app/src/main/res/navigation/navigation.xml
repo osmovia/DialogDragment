@@ -20,10 +20,18 @@
         android:label="LoginFragment" >
         <action
             android:id="@+id/action_loginFragment_to_recyclerWordFragment"
-            app:destination="@id/recyclerWordFragment" />
+            app:destination="@id/recyclerWordFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <dialog
         android:id="@+id/dialogAddWord"
@@ -42,9 +50,21 @@
         android:label="RecyclerWordFragment" >
         <action
             android:id="@+id/action_recyclerWordFragment_to_dialogAddWord"
-            app:destination="@id/dialogAddWord" />
+            app:destination="@id/dialogAddWord"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_recyclerWordFragment_to_deleteWordFragment"
-            app:destination="@id/deleteWordFragment" />
+            app:destination="@id/deleteWordFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+    <fragment
+        android:id="@+id/cloudFirestoreFragment"
+        android:name="com.example.fragment.CloudFirestoreFragment"
+        android:label="CloudFirestoreFragment" />
 </navigation>

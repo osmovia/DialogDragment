@@ -39,29 +39,16 @@ class CustomRecyclerAdapter (private var mutableList: MutableList<CardData>,
             owner?.onItemClick(item)
         }
     }
-
     override fun getItemCount() = mutableList.size
 
-    fun setWords(item: CardData) {
-        mutableList.add(item)
-        notifyDataSetChanged()
-    }
-
-    fun delete(position: Int) {
-        mutableList.removeAt(position)
-        notifyDataSetChanged()
-    }
-
-    fun update(position: Int) {
-        mutableList[position]
-        notifyDataSetChanged()
-    }
     fun setWord(newCardData: CardData) {
         mutableList.forEachIndexed { index, cardData ->
             if (cardData.id == newCardData.id) {
                 mutableList[index] = newCardData
                 notifyItemChanged(index)
                 return
+            } else {
+                notifyItemChanged(index)
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.fragment.databinding.FragmentDeleteWordBinding
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class DeleteWordFragment : DialogFragment() {
@@ -18,7 +19,6 @@ class DeleteWordFragment : DialogFragment() {
     }
 
     lateinit var binding: FragmentDeleteWordBinding
-    private val model: ClassViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +33,6 @@ class DeleteWordFragment : DialogFragment() {
         binding = FragmentDeleteWordBinding.inflate(layoutInflater)
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
         binding.buttonYes.setOnClickListener {
@@ -44,7 +43,7 @@ class DeleteWordFragment : DialogFragment() {
         }
 
     }
-    private fun transferData(yesOrNo: String) {
+    private fun transferData(yesOrNo : String) {
         findNavController().previousBackStackEntry?.savedStateHandle?.set(deleteWordKey, yesOrNo)
         findNavController().popBackStack()
     }

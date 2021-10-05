@@ -5,10 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.fragment.databinding.FragmentDeleteWordBinding
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 class DeleteWordFragment : DialogFragment() {
@@ -20,21 +18,17 @@ class DeleteWordFragment : DialogFragment() {
 
     lateinit var binding: FragmentDeleteWordBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentDeleteWordBinding.inflate(layoutInflater)
+        dialog?.setCanceledOnTouchOutside(false)
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
+        //requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
         binding.buttonYes.setOnClickListener {
             transferData(yes)
         }

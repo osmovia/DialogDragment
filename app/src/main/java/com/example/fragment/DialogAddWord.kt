@@ -12,7 +12,7 @@ import android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
-import com.example.fragment.databinding.DialogBinding
+import com.example.fragment.databinding.FragmentAddWordBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
@@ -28,12 +28,12 @@ class DialogAddWord : DialogFragment() {
     private val cardData: CardData?
         get() = arguments?.getSerializable(cardDataKey) as? CardData?
 
-    lateinit var binding: DialogBinding
+    lateinit var binding: FragmentAddWordBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("SLAVIK", "DialogAddWord: onCreate")
-        setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
+        //setStyle(STYLE_NORMAL, R.style.Theme_App_Dialog_FullScreen)
     }
 
     override fun onCreateView(
@@ -41,8 +41,9 @@ class DialogAddWord : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DialogBinding.inflate(layoutInflater)
+        binding = FragmentAddWordBinding.inflate(layoutInflater)
         Log.d("SLAVIK", "DialogAddWord: onCreateView")
+        dialog?.setCanceledOnTouchOutside(false)
         return binding.root
     }
 
@@ -53,6 +54,7 @@ class DialogAddWord : DialogFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        activity?.hideKeyboard()
         Log.d("SLAVIK", "DialogAddWord: onDestroy")
     }
 
@@ -67,7 +69,7 @@ class DialogAddWord : DialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
+        //requireDialog().window?.setWindowAnimations(R.style.DialogAnimation)
         Log.d("SLAVIK", "DialogAddWord: onViewCreated")
 
         binding.editTextOriginalWord.apply {

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomRecyclerAdapter (private var mutableList: MutableList<CardData>,
+class CustomRecyclerAdapter (var mutableList: MutableList<CardData>,
                              private val owner: RecyclerWordFragment?) :
     RecyclerView.Adapter<CustomRecyclerAdapter.MyViewHolder>() {
 

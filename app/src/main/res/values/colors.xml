@@ -10,4 +10,7 @@
     <color name="blue_lighten">#A6351B4C</color>
     <color name="pure_black">#000000</color>
     <color name="dark_gray">#444444</color>
+    <color name="transparent">#80000000</color>
+    <color name="red_700">#d50000</color>
+    <color name="gray_silver">#C0C0C0</color>
 </resources>

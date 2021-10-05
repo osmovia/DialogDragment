@@ -24,7 +24,9 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@+id/navigation"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
             app:destination="@id/registrationFragment"
@@ -62,9 +64,25 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogLogout"
+            app:destination="@id/dialogLogout" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogLogout2"
+            app:destination="@id/dialogLogout" />
     </fragment>
     <fragment
         android:id="@+id/cloudFirestoreFragment"
         android:name="com.example.fragment.CloudFirestoreFragment"
         android:label="CloudFirestoreFragment" />
+    <dialog
+        android:id="@+id/dialogLogout"
+        android:name="com.example.fragment.DialogLogout"
+        android:label="DialogLogout" >
+        <action
+            android:id="@+id/action_dialogLogout_to_loginFragment"
+            app:popUpTo="@+id/navigation"
+            app:popUpToInclusive="true"
+            app:destination="@id/loginFragment" />
+    </dialog>
 </navigation>

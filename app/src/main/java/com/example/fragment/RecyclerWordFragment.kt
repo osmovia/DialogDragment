@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -12,6 +14,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.FragmentWordRecyclerBinding
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
+import com.facebook.appevents.internal.AppEventUtility
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -19,6 +24,20 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
+import android.view.View.OnAttachStateChangeListener
+
+import android.R.string.no
+import android.R.string.no
+import android.R.string.no
+
+
+
+
+
+
+
+
+
 
 class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,12 +87,16 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 
 
     private var listCardData: MutableList<CardData> = mutableListOf()
+    private var matchedWord: MutableList<CardData> = mutableListOf()
     private var positionClickAndSwipe: Int? = null
     private val dataBase = Firebase.firestore
-    lateinit var adapter: CustomRecyclerAdapter
+    private val adapterRecycler = CustomRecyclerAdapter(listCardData, this)
     private lateinit var binding: FragmentWordRecyclerBinding
     private val documentReference = FirebaseFirestore.getInstance().document("collection/document")
     private val firebaseStore = FirebaseFirestore.getInstance().collection("Word")
+
+    private var isSearchActive = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,28 +112,58 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
         view: View,
         savedInstanceState: Bundle?
     ) {
+
         Log.d("SLAVIK", "RecyclerWordFragment: onViewCreated")
+        Log.d("SLAVIK", "New list: $listCardData")
         //loadData()
 
         listFirebase()
-        adapter = CustomRecyclerAdapter(listCardData, this)
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.adapter = adapter
+        binding.recyclerView.adapter = adapterRecycler
+
+
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                search(p0)
+                return true
+            }
+            override fun onQueryTextChange(p0: String?): Boolean {
+                search(p0)
+                return true
+            }
+        })
+
 
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(
             DeleteWordFragment.deleteWordKey
         )?.observe(
             viewLifecycleOwner
         ) {
-            if (it == DeleteWordFragment.yes) {
+
+            if (it == DeleteWordFragment.yes && !isSearchActive) {
                 val getCardDataDelete = listCardData[positionClickAndSwipe!!]
                 firebaseStore.document(getCardDataDelete.id)
                     .delete()
                 listCardData.removeAt(positionClickAndSwipe!!)
-                adapter.notifyItemRemoved(positionClickAndSwipe!!)
+                adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
                 //saveData()
-            } else {
-                adapter.notifyItemChanged(positionClickAndSwipe!!)
+                //sortList()
+            }
+            if (it == DeleteWordFragment.yes && isSearchActive) {
+                val getCardDataDelete = matchedWord[positionClickAndSwipe!!]
+                run loop@{ listCardData.forEachIndexed { index, it ->
+                        if (getCardDataDelete.id == it.id) {
+                            listCardData.removeAt(index)
+                            firebaseStore.document(it.id)
+                                .delete()
+                            matchedWord.removeAt(positionClickAndSwipe!!)
+                            adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
+                            Log.d("SLAVIK", "KEK")
+                            return@loop
+                        }
+                    }
+                }
             }
         }
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(
@@ -119,25 +172,38 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
             viewLifecycleOwner
         ) { newWord ->
             listCardData.add(newWord)
+            if(isSearchActive) {
+                matchedWord.add(newWord)
+                binding.searchView.setQuery("", false)
+                activity?.hideKeyboard()
+            }
+            adapterRecycler.notifyDataSetChanged()
             //saveData()
+            //sortList()
         }
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(
             DialogAddWord.changeWordKey
         )?.observe(
             viewLifecycleOwner
         ) { changeWord ->
-            adapter.setWord(changeWord)
+            adapterRecycler.setWord(changeWord)
             //saveData()
+            //sortList()
         }
 
         val item = object : SwipeToDelete(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 positionClickAndSwipe = viewHolder.absoluteAdapterPosition
+                adapterRecycler.notifyItemChanged(positionClickAndSwipe!!)
                 findNavController().navigate(R.id.deleteWordFragment)
             }
         }
         val itemTouchHelper = ItemTouchHelper(item)
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+
+        binding.buttonFloatingAction.setOnClickListener{
+            findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogAddWord)
+        }
     }
 
     override fun onCreateOptionsMenu(
@@ -149,7 +215,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogAddWord)
+        findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogLogout)
         return true
     }
 
@@ -259,10 +325,41 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                     val word = document.data.get("word")
                     val translate = document.data.get("translate")
                     listCardData.add(CardData(word = word.toString(),translate = translate.toString(), id = id.toString()))
+                    listCardData.sortBy { it.word }
                     Log.d("SLAVIK", "ListCarData: $listCardData")
                 }
-                adapter.notifyDataSetChanged()
+                listCardData.sortedBy { it.word }
+                adapterRecycler.notifyDataSetChanged()
             }
+    }
+    fun testFacebook() {
+        FacebookSdk.sdkInitialize(context)
+        AppEventsLogger.activateApp(context)
+    }
+    private fun search(text: String?) {
+        matchedWord.clear()
+
+        text?.let {
+            listCardData.forEach {
+                if(it.word.contains(text, true) || it.translate.contains(text, true)) {
+                    matchedWord.add(it)
+                }
+            }
+            isSearchActive = true
+            updateRecyclerViewSearchWord()
+            if(it.isEmpty()) {
+                Toast.makeText(requireContext(), "No match found!", Toast.LENGTH_LONG).show()
+                isSearchActive = false
+                adapterRecycler.mutableList = listCardData
+            }
+        }
+    }
+    private fun updateRecyclerViewSearchWord() {
+        binding.recyclerView.apply {
+
+            adapterRecycler.mutableList = matchedWord
+            adapterRecycler.notifyDataSetChanged()
+        }
     }
 }
 

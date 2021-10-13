@@ -1,3 +1,3 @@
 package com.example.fragment
 
-class SectionWord(val nameSection: String, val isSection: Boolean)
+class SectionWord(val nameWord: String, val isSectionWord : Boolean)

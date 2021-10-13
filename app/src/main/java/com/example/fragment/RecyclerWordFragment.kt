@@ -29,14 +29,9 @@ import android.view.View.OnAttachStateChangeListener
 import android.R.string.no
 import android.R.string.no
 import android.R.string.no
-
-
-
-
-
-
-
-
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import kotlin.collections.ArrayList
 
 
 class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
@@ -90,10 +85,11 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
     private var matchedWord: MutableList<CardData> = mutableListOf()
     private var positionClickAndSwipe: Int? = null
     private val dataBase = Firebase.firestore
-    private val adapterRecycler = CustomRecyclerAdapter(listCardData, this)
+    private val adapterRecycler = CustomRecyclerAdapter(this)
     private lateinit var binding: FragmentWordRecyclerBinding
     private val documentReference = FirebaseFirestore.getInstance().document("collection/document")
     private val firebaseStore = FirebaseFirestore.getInstance().collection("Word")
+    private val wordWithAlphabetHeaders: ArrayList<Any> = arrayListOf()
 
     private var isSearchActive = false
 
@@ -114,7 +110,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
     ) {
 
         Log.d("SLAVIK", "RecyclerWordFragment: onViewCreated")
-        Log.d("SLAVIK", "New list: $listCardData")
+
         //loadData()
 
         listFirebase()
@@ -123,7 +119,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 
 
 
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        /* binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 search(p0)
                 return true
@@ -132,7 +128,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                 search(p0)
                 return true
             }
-        })
+        })*/
 
 
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(
@@ -142,27 +138,58 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
         ) {
 
             if (it == DeleteWordFragment.yes && !isSearchActive) {
-                val getCardDataDelete = listCardData[positionClickAndSwipe!!]
+                val getCardDataDelete = wordWithAlphabetHeaders[positionClickAndSwipe!!] as CardData
                 firebaseStore.document(getCardDataDelete.id)
                     .delete()
-                listCardData.removeAt(positionClickAndSwipe!!)
-                adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
+
+                val firstSymbolDeleteWord = getCardDataDelete.word.first().toString()
+                var hasFirstSymbolHeader = 0
+                run deleteHeader@{
+                    listCardData.forEach { it
+                        if(it.word.first().toString() == firstSymbolDeleteWord){
+                            hasFirstSymbolHeader++
+                        } else if (hasFirstSymbolHeader > 1) {
+                            hasFirstSymbolHeader = 0
+                            return@deleteHeader
+                        }
+                    }
+                }
+                if(hasFirstSymbolHeader == 1){
+                    val deletePositionHeaderMinus = positionClickAndSwipe!!.minus(1)
+                    val deletePositionHeaderPlus = positionClickAndSwipe!!.plus(1)
+                    wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!!)
+                    wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!! - 1)
+                    wordWithAlphabetHeaders.subList(deletePositionHeaderMinus, positionClickAndSwipe!!+1).clear()
+                    adapterRecycler.notifyItemRangeRemoved(deletePositionHeaderMinus, 2)
+                    hasFirstSymbolHeader = 0
+                } else {
+                    wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!!)
+                    adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
+                }
+
+                run deleteWordSearchNoActive@{ listCardData.forEachIndexed { index, cardData ->
+                    if(getCardDataDelete.id == cardData.id) {
+                        listCardData.removeAt(index)
+                        return@deleteWordSearchNoActive
+                    }
+                }
+                }
                 //saveData()
                 //sortList()
             }
             if (it == DeleteWordFragment.yes && isSearchActive) {
                 val getCardDataDelete = matchedWord[positionClickAndSwipe!!]
                 run loop@{ listCardData.forEachIndexed { index, it ->
-                        if (getCardDataDelete.id == it.id) {
-                            listCardData.removeAt(index)
-                            firebaseStore.document(it.id)
-                                .delete()
-                            matchedWord.removeAt(positionClickAndSwipe!!)
-                            adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
-                            Log.d("SLAVIK", "KEK")
-                            return@loop
-                        }
+                    if (getCardDataDelete.id == it.id) {
+                        listCardData.removeAt(index)
+                        firebaseStore.document(it.id)
+                            .delete()
+                        matchedWord.removeAt(positionClickAndSwipe!!)
+                        adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
+                        Log.d("SLAVIK", "KEK")
+                        return@loop
                     }
+                }
                 }
             }
         }
@@ -172,14 +199,14 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
             viewLifecycleOwner
         ) { newWord ->
             listCardData.add(newWord)
-            if(isSearchActive) {
-                matchedWord.add(newWord)
-                binding.searchView.setQuery("", false)
-                activity?.hideKeyboard()
-            }
-            adapterRecycler.notifyDataSetChanged()
-            //saveData()
-            //sortList()
+            adapterRecycler.setWords(listCardData)
+//            if(isSearchActive) {
+//                matchedWord.add(newWord)
+//                binding.searchView.setQuery("", false)
+//                activity?.hideKeyboard()
+//            }
+//            saveData()
+//            sortList()
         }
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(
             DialogAddWord.changeWordKey
@@ -325,18 +352,16 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                     val word = document.data.get("word")
                     val translate = document.data.get("translate")
                     listCardData.add(CardData(word = word.toString(),translate = translate.toString(), id = id.toString()))
-                    listCardData.sortBy { it.word }
                     Log.d("SLAVIK", "ListCarData: $listCardData")
                 }
-                listCardData.sortedBy { it.word }
-                adapterRecycler.notifyDataSetChanged()
+                adapterRecycler.setWords(listCardData)
             }
     }
     fun testFacebook() {
         FacebookSdk.sdkInitialize(context)
         AppEventsLogger.activateApp(context)
     }
-    private fun search(text: String?) {
+    /*private fun search(text: String?) {
         matchedWord.clear()
 
         text?.let {
@@ -353,13 +378,44 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                 adapterRecycler.mutableList = listCardData
             }
         }
-    }
-    private fun updateRecyclerViewSearchWord() {
+    }*/
+    /*private fun updateRecyclerViewSearchWord() {
         binding.recyclerView.apply {
 
             adapterRecycler.mutableList = matchedWord
             adapterRecycler.notifyDataSetChanged()
         }
+    }*/
+
+    fun buildGeneralArray(wordsList: MutableList<CardData>): ArrayList<Any> {
+        wordWithAlphabetHeaders.clear()
+        wordsList.sortBy {
+            it.word
+        }
+        var currentHeader: String? = null
+        wordsList.forEach { carData ->
+            carData.word.firstOrNull()?.toString()?.let { firstCharacter ->
+                if(firstCharacter != currentHeader) {
+                    wordWithAlphabetHeaders.add(firstCharacter)
+                    currentHeader = firstCharacter
+                }
+            }
+            wordWithAlphabetHeaders.add(carData)
+        }
+        return wordWithAlphabetHeaders
+    }
+    fun realm() {
+        val realmName= "Dialog Fragment"
+        val config = RealmConfiguration
+            .Builder()
+            .name(realmName)
+            .build()
+
+        val realm = Realm.getInstance(config)
+
+        val dataModel = Data
+        
+
     }
 }
 

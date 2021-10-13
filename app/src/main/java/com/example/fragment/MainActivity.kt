@@ -12,6 +12,7 @@ import com.example.fragment.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import io.realm.Realm
 
 class MainActivity : AppCompatActivity() {
     // private var listCardData: MutableList<CardData> = mutableListOf()
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Realm.init(this)
          /*loadData()
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)

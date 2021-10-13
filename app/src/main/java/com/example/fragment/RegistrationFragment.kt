@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser
 class RegistrationFragment : Fragment() {
     private lateinit var binding: FragmentRegistrationBinding
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

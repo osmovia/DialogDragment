@@ -9,23 +9,26 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fragment.databinding.ActivityMainBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import io.realm.Realm
 
 class MainActivity : AppCompatActivity() {
-    private var listCardData: MutableList<CardData> = mutableListOf()
-    private var positionFromSwipe: Int? = null
+    // private var listCardData: MutableList<CardData> = mutableListOf()
+    // private var positionFromSwipe: Int? = null
 
     private lateinit var binding: ActivityMainBinding
-    private val model: ClassViewModel by viewModels()
+    //private val model: ClassViewModel by viewModels()
 
-     lateinit var adapter: CustomRecyclerAdapter
+    //lateinit var adapter: CustomRecyclerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        loadData()
+        Realm.init(this)
+         /*loadData()
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         adapter = CustomRecyclerAdapter(listCardData, this)
@@ -90,9 +93,10 @@ class MainActivity : AppCompatActivity() {
         val json = sharedPreferences.getString("task list", "")
         val type = object: TypeToken<MutableList<CardData>>() {}.type
 
-        if(json == null)
+        if(json == null || json.isBlank())
             listCardData = mutableListOf()
         else
             listCardData = gson.fromJson(json, type)
+    }*/
     }
 }

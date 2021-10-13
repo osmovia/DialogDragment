@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/loginFragment">
+
+    <dialog
+        android:id="@+id/deleteWordFragment"
+        android:name="com.example.fragment.DeleteWordFragment"
+        android:label="fragment_delete_word"
+        tools:layout="@layout/fragment_delete_word" />
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.example.fragment.RegistrationFragment"
+        android:label="RegistrationFragment" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.fragment.LoginFragment"
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_recyclerWordFragment"
+            app:destination="@id/recyclerWordFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@+id/navigation"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <dialog
+        android:id="@+id/dialogAddWord"
+        android:name="com.example.fragment.DialogAddWord"
+        android:label="DialogAddWord" >
+
+        <argument
+            android:name="cardData"
+            app:argType="com.example.fragment.CardData"
+            app:nullable="true"/>
+    </dialog>
+
+    <fragment
+        android:id="@+id/recyclerWordFragment"
+        android:name="com.example.fragment.RecyclerWordFragment"
+        android:label="RecyclerWordFragment" >
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogAddWord"
+            app:destination="@id/dialogAddWord"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_deleteWordFragment"
+            app:destination="@id/deleteWordFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogLogout"
+            app:destination="@id/dialogLogout" />
+        <action
+            android:id="@+id/action_recyclerWordFragment_to_dialogLogout2"
+            app:destination="@id/dialogLogout" />
+    </fragment>
+    <fragment
+        android:id="@+id/cloudFirestoreFragment"
+        android:name="com.example.fragment.CloudFirestoreFragment"
+        android:label="CloudFirestoreFragment" />
+    <dialog
+        android:id="@+id/dialogLogout"
+        android:name="com.example.fragment.DialogLogout"
+        android:label="DialogLogout" >
+        <action
+            android:id="@+id/action_dialogLogout_to_loginFragment"
+            app:popUpTo="@+id/navigation"
+            app:popUpToInclusive="true"
+            app:destination="@id/loginFragment" />
+    </dialog>
+</navigation>

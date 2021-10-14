@@ -31,6 +31,8 @@ import android.R.string.no
 import android.R.string.no
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import io.realm.kotlin.executeTransactionAwait
+import kotlinx.coroutines.Dispatchers
 import kotlin.collections.ArrayList
 
 
@@ -90,6 +92,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
     private val documentReference = FirebaseFirestore.getInstance().document("collection/document")
     private val firebaseStore = FirebaseFirestore.getInstance().collection("Word")
     private val wordWithAlphabetHeaders: ArrayList<Any> = arrayListOf()
+    private val list: MutableList<RealmCardData> = mutableListOf()
 
     private var isSearchActive = false
 
@@ -109,14 +112,16 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
         savedInstanceState: Bundle?
     ) {
 
-        Log.d("SLAVIK", "RecyclerWordFragment: onViewCreated")
+        Realm.init(requireContext())
+
+
+        Log.d("SLAVIK", "Realm list: $list")
 
         //loadData()
 
         listFirebase()
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = adapterRecycler
-
 
 
         /* binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -142,11 +147,34 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                 firebaseStore.document(getCardDataDelete.id)
                     .delete()
 
+                val config = RealmConfiguration
+                    .Builder()
+                    .allowWritesOnUiThread(true)
+                    .allowQueriesOnUiThread(true)
+                    .build()
+
+                val realm = Realm.getInstance(config)
+                realm.executeTransaction { realmTransaction ->
+                    val result = realmTransaction
+                        .where(RealmCardData::class.java)
+                        .equalTo("id", getCardDataDelete.id)
+                        .findAll()
+                    result.deleteAllFromRealm()
+                    Log.d("KEK", "Item removed: realm")
+                }
+                list.forEachIndexed { index, realmCardData ->
+                    if(realmCardData.id == getCardDataDelete.id) {
+                        list.removeAt(index)
+                        Log.d("KEK", "New list realm $list, delete id : ${getCardDataDelete.id}")
+                    }
+                }
+
                 val firstSymbolDeleteWord = getCardDataDelete.word.first().toString()
                 var hasFirstSymbolHeader = 0
                 run deleteHeader@{
-                    listCardData.forEach { it
-                        if(it.word.first().toString() == firstSymbolDeleteWord){
+                    listCardData.forEach {
+                        it
+                        if (it.word.first().toString() == firstSymbolDeleteWord) {
                             hasFirstSymbolHeader++
                         } else if (hasFirstSymbolHeader > 1) {
                             hasFirstSymbolHeader = 0
@@ -154,42 +182,42 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
                         }
                     }
                 }
-                if(hasFirstSymbolHeader == 1){
+                if (hasFirstSymbolHeader == 1) {
                     val deletePositionHeaderMinus = positionClickAndSwipe!!.minus(1)
                     val deletePositionHeaderPlus = positionClickAndSwipe!!.plus(1)
-                    wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!!)
-                    wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!! - 1)
-                    wordWithAlphabetHeaders.subList(deletePositionHeaderMinus, positionClickAndSwipe!!+1).clear()
-                    adapterRecycler.notifyItemRangeRemoved(deletePositionHeaderMinus, 2)
+                    wordWithAlphabetHeaders.subList(positionClickAndSwipe!! - 1, positionClickAndSwipe!! + 1).clear()
+                    adapterRecycler.notifyItemRangeRemoved(positionClickAndSwipe!! - 1, 2)
                     hasFirstSymbolHeader = 0
                 } else {
                     wordWithAlphabetHeaders.removeAt(positionClickAndSwipe!!)
                     adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
                 }
 
-                run deleteWordSearchNoActive@{ listCardData.forEachIndexed { index, cardData ->
-                    if(getCardDataDelete.id == cardData.id) {
-                        listCardData.removeAt(index)
-                        return@deleteWordSearchNoActive
+                run deleteWordSearchNoActive@{
+                    listCardData.forEachIndexed { index, cardData ->
+                        if (getCardDataDelete.id == cardData.id) {
+                            listCardData.removeAt(index)
+                            return@deleteWordSearchNoActive
+                        }
                     }
-                }
                 }
                 //saveData()
                 //sortList()
             }
             if (it == DeleteWordFragment.yes && isSearchActive) {
                 val getCardDataDelete = matchedWord[positionClickAndSwipe!!]
-                run loop@{ listCardData.forEachIndexed { index, it ->
-                    if (getCardDataDelete.id == it.id) {
-                        listCardData.removeAt(index)
-                        firebaseStore.document(it.id)
-                            .delete()
-                        matchedWord.removeAt(positionClickAndSwipe!!)
-                        adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
-                        Log.d("SLAVIK", "KEK")
-                        return@loop
+                run loop@{
+                    listCardData.forEachIndexed { index, it ->
+                        if (getCardDataDelete.id == it.id) {
+                            listCardData.removeAt(index)
+                            firebaseStore.document(it.id)
+                                .delete()
+                            matchedWord.removeAt(positionClickAndSwipe!!)
+                            adapterRecycler.notifyItemRemoved(positionClickAndSwipe!!)
+                            Log.d("SLAVIK", "KEK")
+                            return@loop
+                        }
                     }
-                }
                 }
             }
         }
@@ -200,6 +228,38 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
         ) { newWord ->
             listCardData.add(newWord)
             adapterRecycler.setWords(listCardData)
+
+            val config = RealmConfiguration
+                .Builder()
+                .allowWritesOnUiThread(true)
+                .allowQueriesOnUiThread(true)
+                .build()
+            val realm = Realm.getInstance(config)
+            realm.executeTransaction { realmTransaction ->
+                val card = RealmCardData(
+                    word = newWord.word,
+                    translate = newWord.translate,
+                    id = newWord.id
+                )
+                realmTransaction.insert(card)
+            }
+            realm.executeTransaction { realmTransaction ->
+                list.clear()
+                list.addAll(realmTransaction
+                    .where(RealmCardData::class.java)
+                    .findAll()
+                    .map {
+                        RealmCardData(
+                            id = it.id,
+                            word = it.word,
+                            translate = it.translate
+                        )
+                    }
+                )
+            }
+
+            Log.d("KEK", "List realm: $list")
+            Log.d("KEK", "List original: $listCardData")
 //            if(isSearchActive) {
 //                matchedWord.add(newWord)
 //                binding.searchView.setQuery("", false)
@@ -207,161 +267,168 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
 //            }
 //            saveData()
 //            sortList()
-        }
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(
-            DialogAddWord.changeWordKey
-        )?.observe(
-            viewLifecycleOwner
-        ) { changeWord ->
-            adapterRecycler.setWord(changeWord)
-            //saveData()
-            //sortList()
-        }
-
-        val item = object : SwipeToDelete(requireContext()) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                positionClickAndSwipe = viewHolder.absoluteAdapterPosition
-                adapterRecycler.notifyItemChanged(positionClickAndSwipe!!)
-                findNavController().navigate(R.id.deleteWordFragment)
             }
-        }
-        val itemTouchHelper = ItemTouchHelper(item)
-        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
-
-        binding.buttonFloatingAction.setOnClickListener{
-            findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogAddWord)
-        }
-    }
-
-    override fun onCreateOptionsMenu(
-        menu: Menu,
-        inflater: MenuInflater
-    ) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogLogout)
-        return true
-    }
-
-    fun onItemClick(cardData: CardData) {
-        findNavController().navigate(
-            R.id.action_recyclerWordFragment_to_dialogAddWord,
-            bundleOf(DialogAddWord.cardDataKey to cardData)
-        )
-    }
-
-    private fun saveData() {
-        val sharedPreferences = requireActivity().getSharedPreferences(
-            "shared preferences",
-            Context.MODE_PRIVATE
-        )
-        val editor = sharedPreferences.edit()
-        val gson = Gson()
-        val json = gson.toJson(listCardData)
-        editor.putString("task list", json)
-        editor.apply()
-    }
-
-    private fun loadData() {
-        val sharedPreferences = requireActivity().getSharedPreferences(
-            "shared preferences",
-            Context.MODE_PRIVATE
-        )
-        val gson = Gson()
-        val json = sharedPreferences.getString("task list", "")
-        val type = object : TypeToken<MutableList<CardData>>() {}.type
-
-        listCardData = if (json == null || json.isBlank())
-            mutableListOf()
-        else
-            gson.fromJson(json, type)
-    }
-
-    fun addAdaLovelace() {
-        val user = hashMapOf("first" to "Viaheslav", "last" to "Osmolivskyi", "born" to 1995)
-        dataBase.collection("users")
-            .add(user)
-            .addOnSuccessListener { documentReference ->
-                Log.d("SLAVIK", "DocumentSnapshot added with ID: ${documentReference.id}")
+            findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<CardData>(
+                DialogAddWord.changeWordKey
+            )?.observe(
+                viewLifecycleOwner
+            ) { changeWord ->
+                adapterRecycler.setWord(changeWord)
+                //saveData()
+                //sortList()
             }
-            .addOnFailureListener { error ->
-                Log.d("SLAVIK", "Error adding document", error)
-            }
-    }
 
-    fun addAlanMatchison() {
-        val user =
-            hashMapOf("first" to "Igor", "middle" to "Goro", "last" to "Doter", "born" to 2000)
-        dataBase.collection("users")
-            .add(user)
-            .addOnSuccessListener { docunentReference ->
-                Log.d("SLAVIK", "DocumentShapshot added with ID: ${docunentReference.id}")
-            }
-            .addOnFailureListener { error ->
-                Log.d("SLAVIK", "Error adding document", error)
-
-            }
-    }
-
-    fun getAllUsers() {
-        dataBase.collection("users")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    Log.d("SLAVIK", "${document.id} => ${document.data}")
+            val item = object : SwipeToDelete(requireContext()) {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    positionClickAndSwipe = viewHolder.absoluteAdapterPosition
+                    adapterRecycler.notifyItemChanged(positionClickAndSwipe!!)
+                    findNavController().navigate(R.id.deleteWordFragment)
                 }
             }
-            .addOnFailureListener { exception ->
-                Log.d("SLAVIK", "Error getting documents.", exception)
+            val itemTouchHelper = ItemTouchHelper(item)
+            itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+
+            binding.buttonFloatingAction.setOnClickListener {
+                findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogAddWord)
             }
-    }
+        }
 
-    fun saveWordFirestore() {
-        if (listCardData.size == 0) {
-            return
+        override fun onCreateOptionsMenu(
+            menu: Menu,
+            inflater: MenuInflater
+        ) {
+            super.onCreateOptionsMenu(menu, inflater)
+            inflater.inflate(R.menu.menu, menu)
         }
-        listCardData.forEach { cardData ->
-            val id = cardData.id
-            val word = cardData.word
-            val translate = cardData.translate
-        }
-        val hashMap = hashMapOf("KEY" to listCardData)
-        documentReference.set(hashMap).addOnSuccessListener {
-            Log.d("SLAVIK", "Save list")
-        }
-            .addOnFailureListener {
-                Log.d("SLAVIK", "Error save")
-            }
-    }
 
-    fun loadWordFirestore() {
-        documentReference.get().addOnSuccessListener { result ->
-            Log.d("SLAVIK", "Result : ${result.data}")
+        override fun onOptionsItemSelected(item: MenuItem): Boolean {
+            findNavController().navigate(R.id.action_recyclerWordFragment_to_dialogLogout)
+            return true
         }
-    }
 
-    fun listFirebase() {
-        firebaseStore
-            .get()
-            .addOnSuccessListener { rezult ->
-                for (document in rezult) {
-                    val id = document.data.get("id")
-                    val word = document.data.get("word")
-                    val translate = document.data.get("translate")
-                    listCardData.add(CardData(word = word.toString(),translate = translate.toString(), id = id.toString()))
-                    Log.d("SLAVIK", "ListCarData: $listCardData")
+        fun onItemClick(cardData: CardData) {
+            findNavController().navigate(
+                R.id.action_recyclerWordFragment_to_dialogAddWord,
+                bundleOf(DialogAddWord.cardDataKey to cardData)
+            )
+        }
+
+        private fun saveData() {
+            val sharedPreferences = requireActivity().getSharedPreferences(
+                "shared preferences",
+                Context.MODE_PRIVATE
+            )
+            val editor = sharedPreferences.edit()
+            val gson = Gson()
+            val json = gson.toJson(listCardData)
+            editor.putString("task list", json)
+            editor.apply()
+        }
+
+        private fun loadData() {
+            val sharedPreferences = requireActivity().getSharedPreferences(
+                "shared preferences",
+                Context.MODE_PRIVATE
+            )
+            val gson = Gson()
+            val json = sharedPreferences.getString("task list", "")
+            val type = object : TypeToken<MutableList<CardData>>() {}.type
+
+            listCardData = if (json == null || json.isBlank())
+                mutableListOf()
+            else
+                gson.fromJson(json, type)
+        }
+
+        fun addAdaLovelace() {
+            val user = hashMapOf("first" to "Viaheslav", "last" to "Osmolivskyi", "born" to 1995)
+            dataBase.collection("users")
+                .add(user)
+                .addOnSuccessListener { documentReference ->
+                    Log.d("SLAVIK", "DocumentSnapshot added with ID: ${documentReference.id}")
                 }
-                adapterRecycler.setWords(listCardData)
+                .addOnFailureListener { error ->
+                    Log.d("SLAVIK", "Error adding document", error)
+                }
+        }
+
+        fun addAlanMatchison() {
+            val user =
+                hashMapOf("first" to "Igor", "middle" to "Goro", "last" to "Doter", "born" to 2000)
+            dataBase.collection("users")
+                .add(user)
+                .addOnSuccessListener { docunentReference ->
+                    Log.d("SLAVIK", "DocumentShapshot added with ID: ${docunentReference.id}")
+                }
+                .addOnFailureListener { error ->
+                    Log.d("SLAVIK", "Error adding document", error)
+
+                }
+        }
+
+        fun getAllUsers() {
+            dataBase.collection("users")
+                .get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        Log.d("SLAVIK", "${document.id} => ${document.data}")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("SLAVIK", "Error getting documents.", exception)
+                }
+        }
+
+        fun saveWordFirestore() {
+            if (listCardData.size == 0) {
+                return
             }
-    }
-    fun testFacebook() {
-        FacebookSdk.sdkInitialize(context)
-        AppEventsLogger.activateApp(context)
-    }
-    /*private fun search(text: String?) {
+            listCardData.forEach { cardData ->
+                val id = cardData.id
+                val word = cardData.word
+                val translate = cardData.translate
+            }
+            val hashMap = hashMapOf("KEY" to listCardData)
+            documentReference.set(hashMap).addOnSuccessListener {
+                Log.d("SLAVIK", "Save list")
+            }
+                .addOnFailureListener {
+                    Log.d("SLAVIK", "Error save")
+                }
+        }
+
+        fun loadWordFirestore() {
+            documentReference.get().addOnSuccessListener { result ->
+                Log.d("SLAVIK", "Result : ${result.data}")
+            }
+        }
+
+        fun listFirebase() {
+            firebaseStore
+                .get()
+                .addOnSuccessListener { rezult ->
+                    for (document in rezult) {
+                        val id = document.data.get("id")
+                        val word = document.data.get("word")
+                        val translate = document.data.get("translate")
+                        listCardData.add(
+                            CardData(
+                                word = word.toString(),
+                                translate = translate.toString(),
+                                id = id.toString()
+                            )
+                        )
+                        Log.d("SLAVIK", "ListCarData: $listCardData")
+                    }
+                    adapterRecycler.setWords(listCardData)
+                }
+        }
+
+        fun testFacebook() {
+            FacebookSdk.sdkInitialize(context)
+            AppEventsLogger.activateApp(context)
+        }
+        /*private fun search(text: String?) {
         matchedWord.clear()
 
         text?.let {
@@ -379,7 +446,7 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
             }
         }
     }*/
-    /*private fun updateRecyclerViewSearchWord() {
+        /*private fun updateRecyclerViewSearchWord() {
         binding.recyclerView.apply {
 
             adapterRecycler.mutableList = matchedWord
@@ -387,35 +454,75 @@ class RecyclerWordFragment : Fragment(R.layout.fragment_word_recycler) {
         }
     }*/
 
-    fun buildGeneralArray(wordsList: MutableList<CardData>): ArrayList<Any> {
-        wordWithAlphabetHeaders.clear()
-        wordsList.sortBy {
-            it.word
-        }
-        var currentHeader: String? = null
-        wordsList.forEach { carData ->
-            carData.word.firstOrNull()?.toString()?.let { firstCharacter ->
-                if(firstCharacter != currentHeader) {
-                    wordWithAlphabetHeaders.add(firstCharacter)
-                    currentHeader = firstCharacter
-                }
+        fun buildGeneralArray(wordsList: MutableList<CardData>): ArrayList<Any> {
+            wordWithAlphabetHeaders.clear()
+            wordsList.sortBy {
+                it.word
             }
-            wordWithAlphabetHeaders.add(carData)
+            var currentHeader: String? = null
+            wordsList.forEach { carData ->
+                carData.word.firstOrNull()?.toString()?.let { firstCharacter ->
+                    if (firstCharacter != currentHeader) {
+                        wordWithAlphabetHeaders.add(firstCharacter)
+                        currentHeader = firstCharacter
+                    }
+                }
+                wordWithAlphabetHeaders.add(carData)
+            }
+            return wordWithAlphabetHeaders
         }
-        return wordWithAlphabetHeaders
+
+        /*fun realm() {
+            val realmName = "Dialog Fragment"
+            val config = RealmConfiguration
+                .Builder()
+                .name(realmName)
+                .build()
+
+            val realm = Realm.getInstance(config)
+
+            val task: Task = Task()
+            task.name = "New Task"
+
+            realm.executeTransaction { transactionRealm ->
+                transactionRealm.insert(task)
+            }
+        }*/
+
+        fun firstStepRealm() {
+            val config = RealmConfiguration
+                .Builder()
+                .allowWritesOnUiThread(true)
+                .allowQueriesOnUiThread(true)
+                .build()
+            val realm = Realm.getInstance(config)
+            realm.executeTransaction { realmTransaction ->
+                val card = RealmCardData(word = "FIRST", translate = "SECOND")
+                realmTransaction.insert(card)
+            }
+        }
+
+        fun searchFirst() {
+            val config = RealmConfiguration
+                .Builder()
+                .build()
+            val realm = Realm.getInstance(config)
+
+            realm.executeTransaction { realmTransaction ->
+                list.addAll(realmTransaction
+                    .where(RealmCardData::class.java)
+                    .findAll()
+                    .map { list ->
+                        RealmCardData(
+                            word = list.word,
+                            translate = list.translate
+                        )
+                    }
+                )
+            }
+            realm.beginTransaction()
+            realm.deleteAll()
+            realm.commitTransaction()
+        }
     }
-    fun realm() {
-        val realmName= "Dialog Fragment"
-        val config = RealmConfiguration
-            .Builder()
-            .name(realmName)
-            .build()
-
-        val realm = Realm.getInstance(config)
-
-        val dataModel = Data
-        
-
-    }
-}
 

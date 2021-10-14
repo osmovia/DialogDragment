@@ -16,7 +16,8 @@ import com.example.fragment.databinding.FragmentAddWordBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
-class DialogAddWord : DialogFragment() {
+class
+DialogAddWord : DialogFragment() {
 
     companion object {
         const val newWordKey = "NEW_WORD_KEY"
